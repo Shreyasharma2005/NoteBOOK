@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'dart:io';
 
 void main() {
   runApp(const NoteBOOKApp());
@@ -27,6 +29,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   String selectedFileName = "No file selected";
+  String? selectedFilePath;
 
   Future<void> pickPDF() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -37,6 +40,8 @@ class _HomePageState extends State<HomePage> {
     if (result != null) {
       setState(() {
         selectedFileName = result.files.single.name;
+        selectedFilePath = result.files.single.path;
+        print(selectedFilePath);
       });
     }
   }
@@ -48,25 +53,41 @@ class _HomePageState extends State<HomePage> {
         title: const Text("NoteBOOK"),
         centerTitle: true,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      body: Column(
+        children: [
 
-            ElevatedButton(
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: ElevatedButton(
               onPressed: pickPDF,
               child: const Text("Import PDF"),
             ),
+          ),
 
-            const SizedBox(height: 20),
+          Expanded(
+            child: selectedFilePath == null
+                ? const Center(
+                    child: Text("No PDF Selected"),
+                  )
+                : SfPdfViewer.file(
+                    File(selectedFilePath!),
 
-            Text(
-              selectedFileName,
-              style: const TextStyle(fontSize: 18),
-            ),
+                     onTextSelectionChanged:
+                          (PdfTextSelectionChangedDetails details) {
 
-          ],
-        ),
+                        if (details.selectedText != null &&
+                            details.selectedText!.isNotEmpty) {
+
+                          print("==========");
+                          print("SELECTED TEXT:");
+                          print(details.selectedText);
+                          print("==========");
+                        }
+                      },
+                  ),
+          ),
+
+        ],
       ),
     );
   }
