@@ -31,9 +31,12 @@ class _HomePageState extends State<HomePage> {
   String selectedFileName = "No file selected";
   String? selectedFilePath;
   String selectedText = "";
+  PdfViewerController pdfViewerController = PdfViewerController();
+  final TextEditingController questionController = TextEditingController();
 
   Future<void> pickPDF() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
     );
@@ -42,9 +45,85 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         selectedFileName = result.files.single.name;
         selectedFilePath = result.files.single.path;
+
         print(selectedFilePath);
       });
     }
+  }
+
+  void showAskAIDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Ask AI"),
+
+          content: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Selected Text:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius:
+                        BorderRadius.circular(8),
+                  ),
+                  child: Text(selectedText),
+                ),
+
+                const SizedBox(height: 20),
+
+                TextField(
+                  controller: questionController,
+                  decoration: const InputDecoration(
+                    labelText: "Your Question",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          actions: [
+
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+
+                print(
+                  "QUESTION: ${questionController.text}",
+                );
+
+                Navigator.pop(context);
+              },
+              child: const Text("Ask AI"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -75,14 +154,17 @@ class _HomePageState extends State<HomePage> {
                       )
                     : SfPdfViewer.file(
                         File(selectedFilePath!),
+                        controller: pdfViewerController,
 
                         onTextSelectionChanged:
                             (PdfTextSelectionChangedDetails details) {
 
-                          setState(() {
-                            selectedText =
-                                details.selectedText ?? "";
-                          });
+                          if (details.selectedText != null &&
+                              details.selectedText!.isNotEmpty) {
+                            setState(() {
+                              selectedText = details.selectedText!;
+                            });
+                          }
 
                           if (details.selectedText != null &&
                               details.selectedText!.isNotEmpty) {
@@ -104,7 +186,10 @@ class _HomePageState extends State<HomePage> {
               right: 30,
               child: ElevatedButton(
                 onPressed: () {
-                  print("Ask AI clicked");
+
+                  pdfViewerController.clearSelection();
+
+                  showAskAIDialog();
                 },
                 style: ElevatedButton.styleFrom(
                   shape: const StadiumBorder(),
