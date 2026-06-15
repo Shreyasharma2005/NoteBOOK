@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> {
 
   String selectedFileName = "No file selected";
   String? selectedFilePath;
+  String selectedText = "";
 
   Future<void> pickPDF() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -53,40 +54,68 @@ class _HomePageState extends State<HomePage> {
         title: const Text("NoteBOOK"),
         centerTitle: true,
       ),
-      body: Column(
+      body: Stack(
         children: [
 
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: ElevatedButton(
-              onPressed: pickPDF,
-              child: const Text("Import PDF"),
-            ),
+          Column(
+            children: [
+
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: ElevatedButton(
+                  onPressed: pickPDF,
+                  child: const Text("Import PDF"),
+                ),
+              ),
+
+              Expanded(
+                child: selectedFilePath == null
+                    ? const Center(
+                        child: Text("No PDF Selected"),
+                      )
+                    : SfPdfViewer.file(
+                        File(selectedFilePath!),
+
+                        onTextSelectionChanged:
+                            (PdfTextSelectionChangedDetails details) {
+
+                          setState(() {
+                            selectedText =
+                                details.selectedText ?? "";
+                          });
+
+                          if (details.selectedText != null &&
+                              details.selectedText!.isNotEmpty) {
+
+                            print("==========");
+                            print("SELECTED TEXT:");
+                            print(details.selectedText);
+                            print("==========");
+                          }
+                        },
+                      ),
+              ),
+            ],
           ),
 
-          Expanded(
-            child: selectedFilePath == null
-                ? const Center(
-                    child: Text("No PDF Selected"),
-                  )
-                : SfPdfViewer.file(
-                    File(selectedFilePath!),
-
-                     onTextSelectionChanged:
-                          (PdfTextSelectionChangedDetails details) {
-
-                        if (details.selectedText != null &&
-                            details.selectedText!.isNotEmpty) {
-
-                          print("==========");
-                          print("SELECTED TEXT:");
-                          print(details.selectedText);
-                          print("==========");
-                        }
-                      },
+          if (selectedText.isNotEmpty)
+            Positioned(
+              bottom: 30,
+              right: 30,
+              child: ElevatedButton(
+                onPressed: () {
+                  print("Ask AI clicked");
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
                   ),
-          ),
-
+                ),
+                child: const Text("💭 Ask AI?"),
+              ),
+            ),
         ],
       ),
     );
