@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'dart:io';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 void main() {
   runApp(const NoteBOOKApp());
@@ -33,6 +34,30 @@ class _HomePageState extends State<HomePage> {
   String selectedText = "";
   PdfViewerController pdfViewerController = PdfViewerController();
   final TextEditingController questionController = TextEditingController();
+
+  Future<void> testGemini() async {
+    try {
+      print("STARTING GEMINI");
+
+      const apiKey = "PUT API KEY HERE";
+
+      final model = GenerativeModel(
+        model: 'gemini-pro',
+        apiKey: apiKey,
+      );
+
+      final response = await model.generateContent([
+        Content.text("Say hello in one sentence"),
+      ]);
+
+      print("AI RESPONSE:");
+      print(response.text);
+
+    } catch (e) {
+      print("ERROR:");
+      print(e.toString());
+    }
+  }
 
   Future<void> pickPDF() async {
     FilePickerResult? result =
@@ -110,11 +135,13 @@ class _HomePageState extends State<HomePage> {
             ),
 
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
 
                 print(
                   "QUESTION: ${questionController.text}",
                 );
+
+                await testGemini();
 
                 Navigator.pop(context);
               },
@@ -186,9 +213,6 @@ class _HomePageState extends State<HomePage> {
               right: 30,
               child: ElevatedButton(
                 onPressed: () {
-
-                  pdfViewerController.clearSelection();
-
                   showAskAIDialog();
                 },
                 style: ElevatedButton.styleFrom(
