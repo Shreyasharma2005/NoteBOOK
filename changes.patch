@@ -1,0 +1,144 @@
+diff --git a/lib/main.dart b/lib/main.dart
+index 65a7369..36421bf 100644
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
+ import 'package:file_picker/file_picker.dart';
+ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+ import 'dart:io';
+-import 'package:google_generative_ai/google_generative_ai.dart';
++import 'package:http/http.dart' as http;
++import 'dart:convert';
+ 
+ void main() {
+   runApp(const NoteBOOKApp());
+@@ -36,27 +37,83 @@ class _HomePageState extends State<HomePage> {
+   final TextEditingController questionController = TextEditingController();
+ 
+   Future<void> testGemini() async {
++
++    print("STARTING GEMINI");
++
++    const apiKey = "ENTER_YOUR_API_KEY_HERE";
++
++    final url = Uri.parse(
++      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey",
++    );
++
++    final prompt = """
++  Selected Text:
++
++  $selectedText
++
++  Question:
++
++  ${questionController.text}
++  """;
++
+     try {
+-      print("STARTING GEMINI");
+ 
+-      const apiKey = "PUT API KEY HERE";
++      final response = await http.post(
++
++        url,
++
++        headers: {
++          "Content-Type": "application/json",
++        },
++
++        body: jsonEncode({
++
++          "contents": [
++
++            {
++
++              "parts": [
++
++                {
++                  "text": prompt
++                }
++
++              ]
++
++            }
++
++          ]
++
++        }),
+ 
+-      final model = GenerativeModel(
+-        model: 'gemini-pro',
+-        apiKey: apiKey,
+       );
+ 
+-      final response = await model.generateContent([
+-        Content.text("Say hello in one sentence"),
+-      ]);
++      print("STATUS CODE: ${response.statusCode}");
++
++      print("RAW RESPONSE:");
++      print(response.body);
+ 
+-      print("AI RESPONSE:");
+-      print(response.text);
++      if (response.statusCode == 200) {
++
++        final json = jsonDecode(response.body);
++
++        final answer =
++            json["candidates"][0]["content"]["parts"][0]["text"];
++
++        print("==========");
++        print("AI RESPONSE:");
++        print(answer);
++        print("==========");
++
++      }
+ 
+     } catch (e) {
++
+       print("ERROR:");
+-      print(e.toString());
++      print(e);
++
+     }
++
+   }
+ 
+   Future<void> pickPDF() async {
+diff --git a/pubspec.lock b/pubspec.lock
+index 2161142..319c3f0 100644
+--- a/pubspec.lock
++++ b/pubspec.lock
+@@ -176,16 +176,8 @@ packages:
+     description: flutter
+     source: sdk
+     version: "0.0.0"
+-  google_generative_ai:
+-    dependency: "direct main"
+-    description:
+-      name: google_generative_ai
+-      sha256: "71f613d0247968992ad87a0eb21650a566869757442ba55a31a81be6746e0d1f"
+-      url: "https://pub.dev"
+-    source: hosted
+-    version: "0.4.7"
+   http:
+-    dependency: transitive
++    dependency: "direct main"
+     description:
+       name: http
+       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
+diff --git a/pubspec.yaml b/pubspec.yaml
+index 67b32cc..fa67210 100644
+--- a/pubspec.yaml
++++ b/pubspec.yaml
+@@ -32,7 +32,7 @@ dependencies:
+     sdk: flutter
+   file_picker: ^10.2.0
+   syncfusion_flutter_pdfviewer: ^31.1.17
+-  google_generative_ai: ^0.4.7
++  http: ^1.2.1
+ 
+   # The following adds the Cupertino Icons font to your application.
+   # Use with the CupertinoIcons class for iOS style icons.

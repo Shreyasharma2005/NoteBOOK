@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'dart:io';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(const NoteBOOKApp());
@@ -36,27 +37,83 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController questionController = TextEditingController();
 
   Future<void> testGemini() async {
+
+    print("STARTING GEMINI");
+
+    const apiKey = "ENTER_YOUR_API_KEY_HERE";
+
+    final url = Uri.parse(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey",
+    );
+
+    final prompt = """
+  Selected Text:
+
+  $selectedText
+
+  Question:
+
+  ${questionController.text}
+  """;
+
     try {
-      print("STARTING GEMINI");
 
-      const apiKey = "PUT API KEY HERE";
+      final response = await http.post(
 
-      final model = GenerativeModel(
-        model: 'gemini-pro',
-        apiKey: apiKey,
+        url,
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: jsonEncode({
+
+          "contents": [
+
+            {
+
+              "parts": [
+
+                {
+                  "text": prompt
+                }
+
+              ]
+
+            }
+
+          ]
+
+        }),
+
       );
 
-      final response = await model.generateContent([
-        Content.text("Say hello in one sentence"),
-      ]);
+      print("STATUS CODE: ${response.statusCode}");
 
-      print("AI RESPONSE:");
-      print(response.text);
+      print("RAW RESPONSE:");
+      print(response.body);
+
+      if (response.statusCode == 200) {
+
+        final json = jsonDecode(response.body);
+
+        final answer =
+            json["candidates"][0]["content"]["parts"][0]["text"];
+
+        print("==========");
+        print("AI RESPONSE:");
+        print(answer);
+        print("==========");
+
+      }
 
     } catch (e) {
+
       print("ERROR:");
-      print(e.toString());
+      print(e);
+
     }
+
   }
 
   Future<void> pickPDF() async {
