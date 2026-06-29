@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   String selectedFileName = "No file selected";
   String? selectedFilePath;
   String selectedText = "";
+  String responseAI="";
   PdfViewerController pdfViewerController = PdfViewerController();
   final TextEditingController questionController = TextEditingController();
 
@@ -40,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
     print("STARTING GEMINI");
 
-    const apiKey = "ENTER_YOUR_API_KEY_HERE";
+    const apiKey = "API_KEY_HERE";
 
     final url = Uri.parse(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey",
@@ -104,6 +105,9 @@ class _HomePageState extends State<HomePage> {
         print("AI RESPONSE:");
         print(answer);
         print("==========");
+        setState(() {
+            responseAI = answer;
+        });
 
       }
 
