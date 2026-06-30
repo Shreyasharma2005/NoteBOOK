@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
     print("STARTING GEMINI");
 
-    const apiKey = "API_KEY_HERE";
+    const apiKey = "PUT_API_KEY_HERE";
 
     final url = Uri.parse(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey",
@@ -108,6 +108,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
             responseAI = answer;
         });
+        showAIResponseDialog();
 
       }
 
@@ -202,12 +203,39 @@ class _HomePageState extends State<HomePage> {
                   "QUESTION: ${questionController.text}",
                 );
 
-                await testGemini();
-
                 Navigator.pop(context);
+
+                await testGemini();
               },
               child: const Text("Ask AI"),
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showAIResponseDialog(){
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+
+          title: const Text("🤖 AI Explanation"),
+
+          content: SingleChildScrollView(
+            child: Text(responseAI),
+          ),
+
+          actions: [
+
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Close"),
+            ),
+
           ],
         );
       },
@@ -243,6 +271,8 @@ class _HomePageState extends State<HomePage> {
                     : SfPdfViewer.file(
                         File(selectedFilePath!),
                         controller: pdfViewerController,
+
+                        canShowTextSelectionMenu: false,
 
                         onTextSelectionChanged:
                             (PdfTextSelectionChangedDetails details) {
