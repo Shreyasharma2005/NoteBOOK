@@ -1,0 +1,77 @@
+[33mcommit d64ba6101bcd699414342c875daa79d952d6e495[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Shreya Sharma <shreya.sharma1142022@gmail.com>
+Date:   Tue Jun 30 09:27:52 2026 +0530
+
+    added popup AI response on the screen
+
+[1mdiff --git a/lib/main.dart b/lib/main.dart[m
+[1mindex 056cd27..23fde66 100644[m
+[1m--- a/lib/main.dart[m
+[1m+++ b/lib/main.dart[m
+[36m@@ -41,7 +41,7 @@[m [mclass _HomePageState extends State<HomePage> {[m
+ [m
+     print("STARTING GEMINI");[m
+ [m
+[31m-    const apiKey = "API_KEY_HERE";[m
+[32m+[m[32m    const apiKey = "PUT_API_KEY_HERE";[m
+ [m
+     final url = Uri.parse([m
+       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey",[m
+[36m@@ -108,6 +108,7 @@[m [mclass _HomePageState extends State<HomePage> {[m
+         setState(() {[m
+             responseAI = answer;[m
+         });[m
+[32m+[m[32m        showAIResponseDialog();[m
+ [m
+       }[m
+ [m
+[36m@@ -202,12 +203,39 @@[m [mclass _HomePageState extends State<HomePage> {[m
+                   "QUESTION: ${questionController.text}",[m
+                 );[m
+ [m
+[32m+[m[32m                Navigator.pop(context);[m
+[32m+[m
+                 await testGemini();[m
+[32m+[m[32m              },[m
+[32m+[m[32m              child: const Text("Ask AI"),[m
+[32m+[m[32m            ),[m
+[32m+[m[32m          ],[m
+[32m+[m[32m        );[m
+[32m+[m[32m      },[m
+[32m+[m[32m    );[m
+[32m+[m[32m  }[m
+ [m
+[32m+[m[32m  void showAIResponseDialog(){[m
+[32m+[m[32m    showDialog([m
+[32m+[m[32m      context: context,[m
+[32m+[m[32m      builder: (context) {[m
+[32m+[m[32m        return AlertDialog([m
+[32m+[m
+[32m+[m[32m          title: const Text("🤖 AI Explanation"),[m
+[32m+[m
+[32m+[m[32m          content: SingleChildScrollView([m
+[32m+[m[32m            child: Text(responseAI),[m
+[32m+[m[32m          ),[m
+[32m+[m
+[32m+[m[32m          actions: [[m
+[32m+[m
+[32m+[m[32m            TextButton([m
+[32m+[m[32m              onPressed: () {[m
+                 Navigator.pop(context);[m
+               },[m
+[31m-              child: const Text("Ask AI"),[m
+[32m+[m[32m              child: const Text("Close"),[m
+             ),[m
+[32m+[m
+           ],[m
+         );[m
+       },[m
+[36m@@ -244,6 +272,8 @@[m [mclass _HomePageState extends State<HomePage> {[m
+                         File(selectedFilePath!),[m
+                         controller: pdfViewerController,[m
+ [m
+[32m+[m[32m                        canShowTextSelectionMenu: false,[m
+[32m+[m
+                         onTextSelectionChanged:[m
+                             (PdfTextSelectionChangedDetails details) {[m
+ [m

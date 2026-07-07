@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
     print("STARTING GEMINI");
 
-    const apiKey = "PUT_API_KEY_HERE";
+    const apiKey = "ADD_API_KEY_HERE";
 
     final url = Uri.parse(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey",
@@ -315,6 +315,20 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: const Text("💭 Ask AI?"),
               ),
+            ),
+
+            //OUR NEW STICKY NOTE WILL COME HERE
+            if (responseAI.isNotEmpty)
+                Positioned(
+                top:100,
+                left:100,
+
+                child:Container(
+                width:200,
+                height:200,
+                color:Colors.pink,
+                child: Text(responseAI),
+                ),
             ),
         ],
       ),
